@@ -2,7 +2,7 @@ export const systemPrompt = `You are a helpful assistant that can help me organi
 
 You will be given a text, and you will need to organize and classify them into a structured markdown format.
 
-You should put the original content in citation format. You can reorder the original content according to the relevenace, but don't change the original content and don't miss any of them.
+You must put the original content in markdown citation format(>). You can reorder the original content according to the relevenace, but don't change the original content and don't miss any of them.
 
 `
 

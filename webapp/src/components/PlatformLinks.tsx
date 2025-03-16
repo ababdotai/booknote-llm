@@ -52,8 +52,8 @@ function PlatformCard({ icon, title, description, isComingSoon = true, link, bgC
 
 export function PlatformLinks() {
   return (
-    <div className="py-12">
-      <div className="mb-10 text-center">
+    <div className="py-6">
+      <div className="mb-6 text-center">
         <h2 className="mb-4 text-3xl font-bold">多平台支持</h2>
         <p className="mx-auto max-w-2xl text-gray-600 dark:text-gray-400">
           BookNote-LLM 提供多种客户端，满足您在不同场景下的使用需求

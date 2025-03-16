@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MainLayout, TabsLayout } from "@/components/MainLayout";
 import { TextInput } from "@/components/TextInput";
 import { FileUpload } from "@/components/FileUpload";
 import { NoteOutput } from "@/components/NoteOutput";
+import { NoteModal } from "@/components/NoteModal";
 import { Hero } from "@/components/Hero";
 import { PlatformLinks } from "@/components/PlatformLinks";
 import { toast } from "sonner";
 import { ModelConfig } from "@/lib/models/types";
+import { Confetti, ConfettiRef } from "@/components/magicui/confetti";
 
 // 模拟从API获取模型列表
 const AVAILABLE_MODELS: ModelConfig[] = [
@@ -58,6 +60,8 @@ export default function Home() {
   const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id);
   const [models, setModels] = useState<ModelConfig[]>(AVAILABLE_MODELS);
   const [modelInfo, setModelInfo] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const confettiRef = useRef<ConfettiRef>(null);
 
   // 在实际应用中，可以从API获取可用模型列表
   useEffect(() => {
@@ -114,6 +118,16 @@ export default function Home() {
       }
       
       toast.success("笔记生成成功");
+      
+      // 自动打开模态框
+      setIsModalOpen(true);
+      
+      // 触发彩带效果
+      setTimeout(() => {
+        if (confettiRef.current) {
+          confettiRef.current.fire();
+        }
+      }, 300);
     } catch (error) {
       console.error("Error:", error);
       toast.error("生成笔记时出错，请重试");
@@ -127,7 +141,7 @@ export default function Home() {
       <Hero />
       
       <div className="bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-6">
           <PlatformLinks />
         </div>
       </div>
@@ -146,39 +160,38 @@ export default function Home() {
               />
             }
             fileUploadTab={
-              <div className="space-y-8">
-                <FileUpload onFileContent={handleFileContent} models={models} />
-                {inputText && (
-                  <div className="mt-8 flex justify-end">
-                    <button
-                      onClick={() => handleSubmit()}
-                      disabled={isLoading}
-                      className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-6 py-2 rounded-full font-medium transition-all transform hover:scale-105 disabled:opacity-70 disabled:transform-none"
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center gap-2">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          处理中...
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span>生成笔记</span>
-                          <span>✨</span>
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div>
+              <FileUpload 
+                onFileContent={handleFileContent} 
+                onSubmit={handleSubmit}
+                isLoading={isLoading}
+                models={models}
+              />
             }
           />
 
-          {outputText && <NoteOutput content={outputText} />}
+          {outputText && (
+            <NoteOutput content={outputText} modelInfo={modelInfo} />
+          )}
         </div>
       </MainLayout>
+      
+      <Confetti 
+        ref={confettiRef}
+        options={{ 
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.25 }
+        }}
+        manualstart={true}
+        className="fixed inset-0 pointer-events-none z-50"
+      />
+      
+      <NoteModal 
+        isOpen={isModalOpen} 
+        onOpenChange={setIsModalOpen} 
+        content={outputText} 
+        modelInfo={modelInfo} 
+      />
     </>
   );
 }

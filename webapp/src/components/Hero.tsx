@@ -6,7 +6,7 @@ import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-b
 export function Hero() {
   return (
     <div className="relative overflow-hidden pb-10">
-      <WarpBackground className="p-0" beamsPerSide={5} beamSize={3} beamDuration={5} gridColor="rgba(59, 130, 246, 0.2)">
+      <WarpBackground className="p-0" beamsPerSide={3} beamSize={3} beamDuration={50} gridColor="rgba(59, 130, 246, 0.2)">
         <div className="container mx-auto px-4 pt-10 text-center">
           {/* Logo和标题 */}
           <div className="mb-6 flex justify-center">
@@ -50,7 +50,7 @@ export function Hero() {
       </WarpBackground>
       
       {/* 开始使用按钮 */}
-      <div className="flex justify-center mt-10 mb-0">
+      <div className="flex justify-center mt-20 mb-0">
         <InteractiveHoverButton
           className="border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
           onClick={() => document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' })}
