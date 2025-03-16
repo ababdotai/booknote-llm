@@ -3,21 +3,31 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { SourceSelector } from "./SourceSelector";
+import { ModelSelector } from "./ModelSelector";
+import { ModelConfig } from "@/lib/models/types";
 
 interface TextInputProps {
   value: string;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (source?: string, model?: string) => void;
   isLoading: boolean;
+  models: ModelConfig[];
 }
 
-export function TextInput({ value, onChange, onSubmit, isLoading }: TextInputProps) {
-  const [selectedSource, setSelectedSource] = useState("other");
+export function TextInput({ value, onChange, onSubmit, isLoading, models }: TextInputProps) {
+  const [selectedSource, setSelectedSource] = useState("kindle");
+  const [selectedModel, setSelectedModel] = useState(models[0]?.id || "gpt-4o-mini");
 
   return (
     <Card className="w-full border-0 shadow-md bg-white dark:bg-gray-800 overflow-hidden">
       <CardContent className="p-6">
         <SourceSelector selectedSource={selectedSource} onSelectSource={setSelectedSource} />
+        
+        <ModelSelector 
+          models={models} 
+          selectedModel={selectedModel} 
+          onSelectModel={setSelectedModel} 
+        />
         
         <div className="relative">
           <div className="absolute top-3 left-3 text-gray-400 dark:text-gray-500">
@@ -36,7 +46,7 @@ export function TextInput({ value, onChange, onSubmit, isLoading }: TextInputPro
       </CardContent>
       <CardFooter className="flex justify-end p-4 bg-gray-50 dark:bg-gray-900">
         <Button 
-          onClick={onSubmit} 
+          onClick={() => onSubmit(selectedSource, selectedModel)} 
           disabled={!value.trim() || isLoading}
           className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-6 py-2 rounded-full font-medium transition-all transform hover:scale-105 disabled:opacity-70 disabled:transform-none"
         >

@@ -1,14 +1,10 @@
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { ModelServiceFactory } from "@/lib/models";
+import { GenerateParams } from "@/lib/models/types";
 
 export async function POST(req: Request) {
   try {
-    const { content, source = "other" } = await req.json();
+    const { content, source = "other", model = process.env.DEFAULT_MODEL || "gpt-4o-mini", temperature } = await req.json() as GenerateParams;
 
     if (!content) {
       return NextResponse.json(
@@ -17,33 +13,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // System prompt from the template
-    const systemPrompt = `You are a helpful assistant that can help me organize my underlines and notes, either from books, blog articles or web pages.
+    // 根据模型ID获取对应的模型服务
+    const modelService = ModelServiceFactory.getServiceByModelId(model);
 
-You will be given a text, and you will need to organize and classify them into a structured markdown format.
-
-You should put the original content in citation format. You can reorder the original content according to the relevenace, but don't change the original content and don't miss any of them.
-
-The content is from source: ${source}. ${getSourceSpecificInstructions(source)}`;
-
-    // User prompt from the template
-    const userPrompt = `Here is the content:
-
-${content}`;
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
+    // 调用模型服务生成内容
+    const result = await modelService.generate({
+      content,
+      source,
+      model,
+      temperature,
     });
 
-    return NextResponse.json({
-      result: response.choices[0].message.content,
-    });
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error generating content:", error);
     return NextResponse.json(
@@ -52,18 +33,3 @@ ${content}`;
     );
   }
 }
-
-function getSourceSpecificInstructions(source: string): string {
-  switch (source) {
-    case "kindle":
-      return "For Kindle highlights, pay attention to the location information and organize by chapters if possible.";
-    case "weread":
-      return "For WeRead (微信读书) highlights, organize by chapters and include any reader comments.";
-    case "wechat":
-      return "For WeChat (微信公众号) articles, focus on extracting key points and organizing by themes.";
-    case "web":
-      return "For web content, organize by sections and highlight important information.";
-    default:
-      return "Organize the content in a logical structure with headings and subheadings.";
-  }
-} 

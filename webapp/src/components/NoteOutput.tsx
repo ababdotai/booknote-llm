@@ -5,9 +5,10 @@ import { toast } from "sonner";
 
 interface NoteOutputProps {
   content: string;
+  modelInfo?: string;
 }
 
-export function NoteOutput({ content }: NoteOutputProps) {
+export function NoteOutput({ content, modelInfo }: NoteOutputProps) {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
@@ -40,6 +41,11 @@ export function NoteOutput({ content }: NoteOutputProps) {
         <CardTitle className="flex items-center gap-2 text-xl">
           <span className="text-green-500 dark:text-green-400">📝</span>
           <span>生成的笔记</span>
+          {modelInfo && (
+            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
+              {modelInfo}
+            </span>
+          )}
         </CardTitle>
         <div className="flex gap-3">
           <Button 
