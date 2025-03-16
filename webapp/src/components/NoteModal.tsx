@@ -17,6 +17,7 @@ interface NoteModalProps {
 export function NoteModal({ isOpen, onOpenChange, content, modelInfo }: NoteModalProps) {
   const [copied, setCopied] = useState(false)
   const confettiRef = useRef<ConfettiRef>(null)
+  const [title, setTitle] = useState<string>("生成的笔记")
 
   // 当模态框打开时触发彩带效果
   useEffect(() => {
@@ -26,6 +27,22 @@ export function NoteModal({ isOpen, onOpenChange, content, modelInfo }: NoteModa
       }, 300)
     }
   }, [isOpen])
+
+  // 提取内容的第一行作为标题
+  useEffect(() => {
+    if (content) {
+      const firstLine = content.split('\n').find(line => line.trim() !== '')
+      if (firstLine) {
+        // 移除Markdown标记并截取前30个字符
+        const cleanTitle = firstLine
+          .replace(/^#+\s+/, '') // 移除标题标记
+          .replace(/[*_`~]/g, '') // 移除其他Markdown标记
+          .trim()
+        
+        setTitle(cleanTitle.length > 30 ? cleanTitle.substring(0, 30) + '...' : cleanTitle)
+      }
+    }
+  }, [content])
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(content)
@@ -132,7 +149,7 @@ export function NoteModal({ isOpen, onOpenChange, content, modelInfo }: NoteModa
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[90vw] h-[90vh] p-0 overflow-hidden flex flex-col">
+      <DialogContent className="w-screen h-screen max-w-none m-0 p-0 rounded-none overflow-hidden flex flex-col">
         <Confetti
           ref={confettiRef}
           options={{
@@ -144,22 +161,46 @@ export function NoteModal({ isOpen, onOpenChange, content, modelInfo }: NoteModa
           className="absolute inset-0 pointer-events-none"
         />
 
-        <DialogHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-b p-4 flex flex-row items-center justify-between">
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <span className="text-green-500 dark:text-green-400">📝</span>
-            <span>生成的笔记</span>
+        <DialogHeader className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b p-4 flex flex-row items-center justify-between">
+          <div className="flex-1 flex justify-start">
+            <span className="text-green-500 dark:text-green-400 text-xl">📝</span>
+          </div>
+          
+          <DialogTitle className="flex-1 text-center text-xl font-medium">
+            {title}
             {modelInfo && <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">{modelInfo}</span>}
           </DialogTitle>
-          <DialogClose className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700">
-            <X className="h-4 w-4" />
-          </DialogClose>
+          
+          <div className="flex-1 flex justify-end">
+            <TooltipProvider>
+              <Dock
+                className="bg-transparent"
+                iconSize={32}
+                iconMagnification={36}
+                iconDistance={80}
+              >
+                <DockIcon className="hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" onClick={() => onOpenChange(false)}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-center h-full w-full">
+                        <X className="h-4 w-4" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>关闭</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </DockIcon>
+              </Dock>
+            </TooltipProvider>
+          </div>
         </DialogHeader>
 
         <div className="flex-grow overflow-auto p-6">
           <MarkdownRenderer content={content} />
         </div>
 
-        <div className="border-t p-4 flex justify-center">
+        <div className="border-t p-4 flex justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
           <TooltipProvider>
             <Dock
               className="bg-white/50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-gray-800"

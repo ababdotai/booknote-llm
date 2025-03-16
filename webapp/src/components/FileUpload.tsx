@@ -124,7 +124,7 @@ export function FileUpload({ onFileContent, onSubmit, isLoading = false, models 
         </div>
       </CardContent>
       {fileName && onSubmit && (
-        <CardFooter className="flex justify-end p-4 bg-gray-50 dark:bg-gray-900">
+        <CardFooter className="flex justify-end p-4 border-t border-gray-100 dark:border-gray-800">
           <Button 
             onClick={() => onSubmit(selectedSource, selectedModel)} 
             disabled={isLoading}
